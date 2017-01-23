@@ -1,0 +1,63 @@
+#include <iostream>
+#include <string>
+#include <vector>
+#include <bitset>
+#include <algorithm>
+
+using namespace std;
+
+/**
+ * Auto-generated code below aims at helping you parse
+ * the standard input according to the problem statement.
+ **/
+int main()
+{
+    string MESSAGE;
+    string output;
+    
+    getline(cin, MESSAGE);
+    
+    vector <vector <char>> mainSerie;
+    vector <char> tempSeries;
+    
+    char lastOne = ' ';
+    
+    for (int i = 0; i < MESSAGE.length(); i++) {
+        char letter = MESSAGE[i];
+        string buffer = bitset<8>(letter).to_string();
+        
+        output = output + buffer;
+    }
+    
+    
+    
+    for (auto& ch : output) {
+        char localLetter = (char) ch;
+        cerr << "localLetter: " << localLetter << " and lastOne letter: "  << lastOne << endl;
+        
+        if (localLetter == lastOne) {
+            tempSeries.push_back(localLetter);
+        } else {
+            if (tempSeries.size() != 0) {
+                mainSerie.push_back(tempSeries);
+            }
+            
+            tempSeries.clear();
+            tempSeries.push_back(localLetter);
+        }
+        lastOne = localLetter;   
+    }
+    
+    for (auto& item : mainSerie) {
+        cout << item.size() << "; ";
+    }
+    cout << endl;
+    cout << output << endl;
+    
+    // cout << "output result is :" << output << endl;
+
+    // Write an action using cout. DON'T FORGET THE "<< endl"
+    // To debug: cerr << "Debug messages..." << endl;
+
+    // cout << "answer" << endl;
+}
