@@ -1,0 +1,163 @@
+#include <iostream>
+#include <cstring>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+class Batman {
+    private:
+        int W, H, N, X0, Y0;
+        int xStep = 1, yStep = 1;
+        char bombDir[2];
+        bool jumpX = false, jumpY = false, stepIsKnown = false;
+        int lastX, lastY;
+        
+    public:
+        void initData(int w, int h, int n, int x0, int y0);
+        void getRoute(string dir);
+        void debug(string dir);
+        int *countStep(void);
+};
+
+
+int *Batman::countStep(void) {
+    int *result = new int[2];
+
+    int xLocalResult, yLocalResult;
+    
+    if (Y0 == lastY) {
+        xLocalResult = (int) W/N;
+        if (xLocalResult <= 0) {
+            xLocalResult = 1;
+        } else {
+             jumpX = true;    
+        }
+    }
+    
+    if (X0 == lastX) {
+        yLocalResult = (int) H/N;
+        if (yLocalResult <= 0) {
+            yLocalResult = 1;
+        } else {
+            jumpY = true;    
+        }
+    }
+    result[0] = xLocalResult;
+    result[1] = yLocalResult;
+     
+    return result;
+}
+
+void Batman::getRoute(string dir){
+    int *steps;
+    if (!stepIsKnown) {
+        steps = Batman::countStep();
+        
+        if (jumpX) {
+            xStep = *steps;
+            stepIsKnown = true;
+            cerr << "xStep is :" << xStep << endl;
+            // xStep = xStep * N;
+            // jumpX = false;
+        } else {
+            xStep = 1;
+        }
+    
+        if (jumpY) {
+            yStep = *(steps + 1);
+            stepIsKnown = true;
+            cerr << "yStep is :" << yStep << endl;
+            // yStep = yStep * N;
+            // jumpY = false;
+        } else {
+            yStep = 1;
+        }
+    }
+    
+    lastX = X0;
+    lastY = Y0;
+
+    
+    
+
+    if (dir.length() >= 1) {
+        switch (dir[0]){
+            case 'U':  
+                if (Y0 - yStep >= 0) {
+                      Y0 = Y0 - yStep; 
+                }
+                break;
+            case 'D':  
+                if (Y0 + yStep <= H) {
+                      Y0 = Y0 + yStep;;  
+                }
+        }
+    }
+    
+    if (dir.length() == 2) {
+        switch (dir[1]){
+            case 'L':
+                if (X0 - xStep >= 0) {
+                    X0 = X0 - xStep; 
+                }
+                     
+                break;
+            case 'R': 
+                if (X0 + xStep <= W) {
+                    X0 = X0 + xStep; 
+                }
+        }
+    }
+    
+    cout << X0 << " " << Y0 << endl;
+}
+
+void Batman::initData(int w, int h, int n, int x0, int y0) {
+    W = w;
+    H = h;
+    N = n;
+    X0 = x0;
+    Y0 = y0;
+}
+
+void Batman::debug(string dir) {
+    cerr << "w=" << W << "; " ;
+    cerr << "h=" << H << "; " ;
+    cerr << "n=" << N << "; " ;
+    cerr << "x0=" << X0 << "; " ;
+    cerr << "y0=" << Y0 << "; " ;
+    
+    cerr << " dir is " << dir << endl;
+}
+ 
+/**
+ * Auto-generated code below aims at helping you parse
+ * the standard input according to the problem statement.
+ **/
+int main()
+{
+    int W; // width of the building.
+    int H; // height of the building.
+    cin >> W >> H; cin.ignore();
+    int N; // maximum number of turns before game over.
+    cin >> N; cin.ignore();
+    int X0;
+    int Y0;
+    cin >> X0 >> Y0; cin.ignore();
+    
+    Batman bat;
+    bat.initData(W, H, N, X0, Y0);
+
+    while (1) {
+        string bombDir; // the direction of the bombs from batman's current location (U, UR, R, DR, D, DL, L or UL)
+        cin >> bombDir; cin.ignore();
+        // cout << bombDir << endl;
+        // Write an action using cout. DON'T FORGET THE "<< endl"
+        // To debug: cerr << "Debug messages..." << endl;
+        // cerr << bombDir << endl;
+        bat.debug(bombDir);
+        bat.getRoute(bombDir);
+        // the location of the next window Batman should jump to.
+    }
+}
