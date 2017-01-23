@@ -7,57 +7,108 @@
 using namespace std;
 
 /**
- * Auto-generated code below aims at helping you parse
- * the standard input according to the problem statement.
- **/
+* Auto-generated code below aims at helping you parse
+* the standard input according to the problem statement.
+**/
+
+string getFinalSubstrings(char ch, int nr);
+
+string recursivelyRemove(string text);
+
+string getFinalSubstrings(char ch, int nr) {
+	string output;
+
+	if (ch == '0') {
+		output = "00 ";
+	} else {
+		output = "0 ";
+	}
+
+	for (int i = 0; i < nr; i++) {
+		output = output + "0";
+	}
+
+	output = output + " ";
+
+	return output;
+}
+
+string recursivelyRemove(string text) {
+    text.erase(0, 1);
+    
+    return text;
+}
+
 int main()
 {
-    string MESSAGE;
-    string output;
-    
-    getline(cin, MESSAGE);
-    
-    vector <vector <char>> mainSerie;
-    vector <char> tempSeries;
-    
-    char lastOne = ' ';
-    
-    for (int i = 0; i < MESSAGE.length(); i++) {
-        char letter = MESSAGE[i];
-        string buffer = bitset<8>(letter).to_string();
-        
-        output = output + buffer;
-    }
-    
-    
-    
-    for (auto& ch : output) {
-        char localLetter = (char) ch;
-        cerr << "localLetter: " << localLetter << " and lastOne letter: "  << lastOne << endl;
-        
-        if (localLetter == lastOne) {
-            tempSeries.push_back(localLetter);
-        } else {
-            if (tempSeries.size() != 0) {
-                mainSerie.push_back(tempSeries);
+	string MESSAGE;
+	string output;
+	string buffer;
+
+	getline(cin, MESSAGE);
+
+	vector <vector <char>> mainSerie;
+	vector <char> tempSeries;
+
+	char lastOne = ' ';
+
+	for (int i = 0; i < MESSAGE.length(); i++) {
+		buffer = bitset<8>(MESSAGE[i]).to_string();
+        bool wasOne = false;
+        while (!wasOne) {
+            string finalString;
+            if (buffer[0] == '0') { 
+                wasOne = true;
+                finalString = recursivelyRemove(buffer);
+            } else {
+                wasOne = true;
+                break;
             }
             
-            tempSeries.clear();
-            tempSeries.push_back(localLetter);
+            buffer = finalString;
         }
-        lastOne = localLetter;   
-    }
-    
-    for (auto& item : mainSerie) {
-        cout << item.size() << "; ";
-    }
-    cout << endl;
-    cout << output << endl;
-    
-    // cout << "output result is :" << output << endl;
+        
+		output = output + buffer;
+	}
 
-    // Write an action using cout. DON'T FORGET THE "<< endl"
-    // To debug: cerr << "Debug messages..." << endl;
+    cerr << "fucking output string: " << output << endl;
 
-    // cout << "answer" << endl;
+	for (auto& ch : output) {
+		char localLetter = (char)ch;
+
+		if (localLetter == lastOne) {
+			tempSeries.push_back(localLetter);
+		}
+		else {
+			if (tempSeries.size() != 0) {
+				mainSerie.push_back(tempSeries);
+			}
+
+			tempSeries.clear();
+			tempSeries.push_back(localLetter);
+		}
+		lastOne = localLetter;
+	}
+
+	mainSerie.push_back(tempSeries);
+
+
+	string result;
+
+	for (auto& item : mainSerie) {
+		string localSubstring = getFinalSubstrings(item[0], item.size());
+
+		result = result + localSubstring;
+	}
+
+	if (result[result.length() - 1] == ' ') {
+		result = result.erase(result.length() - 1, result.length());
+	}
+
+	cout << result << endl;
+
+	// Write an action using cout. DON'T FORGET THE "<< endl"
+	// To debug: cerr << "Debug messages..." << endl;
+
+	// cout << "answer" << endl;
 }
