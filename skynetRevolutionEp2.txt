@@ -1,0 +1,101 @@
+#include <iostream>
+#include <string>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+class SkyNet {
+    private:
+        int N, L, E;
+        vector <vector <int>> matrix;
+        vector <int> gateways;
+        vector <int>intermediateLevel;
+    public:
+        SkyNet(int n, int l, int e);
+        void setNodes(int n1, int n2);
+        void setGateways(int e);
+        string checkLevelOne(int si);
+        string checkLevelTwo(int si);
+        void cutLink();
+};
+
+
+
+string SkyNet::checkLevelOne(int si) {
+    string result;
+    
+    vector <int> levelOne;
+    for (auto& node : matrix) {
+        if (node[0] == si) {
+            for (auto& gateway : gateways) {
+                if (gateway == node[1]) {
+                    result = (string) node[0] + " " + node[1];
+                    
+                    return result;
+                } else {
+                    intermediateLevel.push_back(node[1]);
+                }
+            }
+        }
+    }
+}
+
+void SkyNet::setGateways (int e) {
+    gateways.push_back(e);
+}
+
+void SkyNet::setNodes(int n1, int n2) {
+    vector <int>temp;
+    temp.push_back(n1);
+    temp.push_back(n2);
+    
+    matrix.push_back(temp);
+}
+
+SkyNet::SkyNet (int n, int l, int e) {
+    N = n;
+    L = l;
+    E = e;
+}
+
+/**
+ * Auto-generated code below aims at helping you parse
+ * the standard input according to the problem statement.
+ **/
+int main()
+{
+    int N; // the total number of nodes in the level, including the gateways
+    int L; // the number of links
+    int E; // the number of exit gateways
+    cin >> N >> L >> E; cin.ignore();
+    
+    SkyNet agent(N, L, E);
+    
+    for (int i = 0; i < L; i++) {
+        int N1; // N1 and N2 defines a link between these nodes
+        int N2;
+        cin >> N1 >> N2; cin.ignore();
+        agent.setNodes(N1, N2);
+    }
+    
+    for (int i = 0; i < E; i++) {
+        int EI; // the index of a gateway node
+        cin >> EI; cin.ignore();
+        
+        agent.setGateways(EI);
+    }
+
+    // game loop
+    while (1) {
+        int SI; // The index of the node on which the Skynet agent is positioned this turn
+        cin >> SI; cin.ignore();
+
+        // Write an action using cout. DON'T FORGET THE "<< endl"
+        // To debug: cerr << "Debug messages..." << endl;
+
+
+        // Example: 3 4 are the indices of the nodes you wish to sever the link between
+        cout << "3 4" << endl;
+    }
+}
