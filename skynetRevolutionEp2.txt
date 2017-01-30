@@ -2,50 +2,208 @@
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <map>
 
 using namespace std;
 
-class SkyNet {
-    private:
-        int N, L, E;
+class BaseClass {
+    public:
+        int N, L, E, SI;
+        int globalNodeToCut[2] = {0, 1};
         vector <vector <int>> matrix;
         vector <int> gateways;
-        vector <int>intermediateLevel;
+        
     public:
-        SkyNet(int n, int l, int e);
-        void setNodes(int n1, int n2);
-        void setGateways(int e);
-        string checkLevelOne(int si);
-        string checkLevelTwo(int si);
-        void cutLink();
+        bool cutLink(map  <int, vector<int>>links, string level, int id[]);
+        bool in_array(const int &value, const vector <int>&array);
 };
 
+bool BaseClass::in_array(const int &value, const vector <int>&array) 
+{
+    return find(array.begin(), array.end(), value) != array.end();    
+}
 
-
-string SkyNet::checkLevelOne(int si) {
-    string result;
+bool BaseClass::cutLink (map <int, vector<int>>links, string level, int id[2]) 
+{
+    int position;
+    int iterator = 0;
+    cerr << "identifiers : " << id[0] << id[1] << endl;
     
-    vector <int> levelOne;
-    for (auto& node : matrix) {
-        if (node[0] == si) {
-            for (auto& gateway : gateways) {
-                if (gateway == node[1]) {
-                    result = (string) node[0] + " " + node[1];
-                    
-                    return result;
-                } else {
-                    intermediateLevel.push_back(node[1]);
+    cerr << "BaseClass level: " << level << endl;
+    
+    for (auto &item : links) {
+        
+        cerr << "number of iteration: " << iterator << endl;
+        
+        if (id[0] == 0) {
+            position = item.first;
+        } else {
+            position = id[0];
+        }
+            
+        cout << item.second[0] << " " << item.second[1] << endl;
+        matrix.erase(matrix.begin() + position);
+        break; 
+    }
+    
+    return true;
+}
+
+class SkyNet : public BaseClass {
+    protected:
+        bool firstShoot = false;
+    public:
+        SkyNet(int n, int l, int e);
+        void setNodes (int n1, int n2);
+        void setGateways (int e);
+        bool checkLevelOne (int si);
+        bool checkLevelTwo (vector <int>intermLevel);
+        bool cutLink (int position, int node[], string level);
+        bool checkLevelThree (map <int, bool>levelThree);
+        
+        void setSkyNetPosition(int si);
+};
+
+/**
+ * Display link that will be cutted then remove them form main array
+ */
+bool SkyNet::cutLink (int position, int node[], string level) 
+{
+    int a = node[0], b = node[1];
+    cerr << "SkyNet level: " << level << endl;
+    cout << a << " " << b << endl;
+    matrix.erase(matrix.begin() + position);
+    
+    return true;
+}
+
+/**
+ * 
+ */
+bool SkyNet::checkLevelThree (map <int, bool>levelThree) {
+    
+    map <int, vector<int>>gatewayLinks;
+    
+    for (auto &matrixItem : matrix) {
+        for (auto &node : levelThree) {
+            if (node.first == matrixItem[0]) {
+                 for (auto &gatewayItem : gateways) {
+                    if (matrixItem[1] == gatewayItem) {
+                        vector <int> tempVec;
+                        tempVec.push_back (matrixItem[0]);
+                        tempVec.push_back (matrixItem[1]);
+                        gatewayLinks.insert (make_pair(matrixItem[0], tempVec));
+                    }
+                 }
+            }
+        }
+    }
+    
+    return BaseClass::cutLink (gatewayLinks, "three", globalNodeToCut);
+}
+
+/**
+ * 
+ */
+bool SkyNet::checkLevelTwo (vector <int>intermLevel) 
+{
+    int linkToCut[2];
+    int position;
+    bool linkWasPrepared = false;
+    map <int, vector<int>>cuttingStack;
+    map <int, bool>levelThree;
+    
+    for (auto &node : intermLevel) {
+        cerr << node << ", " ;
+    }
+    
+    cerr << endl;    
+    
+    for (int i = 0; i < matrix.size(); i++) {
+        for (int y = 0; y < intermLevel.size(); y++) {
+            int intermediateLevelElement = intermLevel[y];
+            if (matrix[i][1] == intermLevel[y]) {
+                int tmp = matrix[i][0];
+                matrix[i][0] = matrix[i][1];
+                matrix[i][1] = tmp;
+            }
+
+            if (matrix[i][0] == intermediateLevelElement) {
+                bool temp = BaseClass::in_array(matrix[i][1], intermLevel);
+                if (temp) { continue; }
+                cerr << matrix[i][0] << " --- " << matrix[i][1] << " :: " << temp << endl;
+                                
+                for (int z = 0; z < gateways.size(); z++) {
+                    if (matrix[i][1] == gateways[z]) {
+                        int buff[2] = {matrix[i][0], matrix[i][1]};
+                        cerr << "agent is on " << matrix[i][0] << ", " << matrix[i][1] << endl;
+
+                        return SkyNet::cutLink (i, buff, "two");  
+                    } else {
+                        // if ()
+                        vector <int>buffLink;
+                        buffLink.push_back(matrix[i][0]);
+                        buffLink.push_back(matrix[i][1]);
+                        cuttingStack.insert(make_pair(i,  buffLink));
+                        
+                        levelThree.insert(make_pair(matrix[i][1], true));
+                        
+                    }
                 }
             }
         }
     }
+    
+    bool levelThreeStatus = SkyNet::checkLevelThree(levelThree);
+    
+    // return BaseClass::cutLink (cuttingStack, "two");
+    return true;
 }
 
-void SkyNet::setGateways (int e) {
+bool SkyNet::checkLevelOne (int si) 
+{
+    vector <int> intermediateLevel;
+    map <int, bool>levelTwo;
+        
+    for (int i = 0; i < matrix.size(); i++) {
+        vector <int> node;
+        node = matrix[i];
+       
+        if (node[1] == si) {
+            int tmp = node[1];
+            node[1] = node[0];
+            node[0] = tmp;
+        }
+       
+        if (node[0] == si) {
+            for (auto& gateway : gateways) {
+                if (gateway == node[1]) {
+                    
+                    int buff[2] = {node[0], node[1]};
+                    
+                    return SkyNet::cutLink(i, buff, "one");
+                }  else {
+                    
+                    levelTwo.insert(make_pair(node[1], true));
+                }
+            }
+        }
+    }
+    
+    for (auto &index : levelTwo) {
+        intermediateLevel.push_back((int)index.first);
+    }
+    
+    return SkyNet::checkLevelTwo(intermediateLevel);
+}
+
+void SkyNet::setGateways (int e) 
+{
     gateways.push_back(e);
 }
 
-void SkyNet::setNodes(int n1, int n2) {
+void SkyNet::setNodes (int n1, int n2) 
+{
     vector <int>temp;
     temp.push_back(n1);
     temp.push_back(n2);
@@ -53,11 +211,18 @@ void SkyNet::setNodes(int n1, int n2) {
     matrix.push_back(temp);
 }
 
-SkyNet::SkyNet (int n, int l, int e) {
+void SkyNet::setSkyNetPosition(int si) 
+{
+    SI = si;    
+}
+
+SkyNet::SkyNet (int n, int l, int e) 
+{
     N = n;
     L = l;
     E = e;
 }
+
 
 /**
  * Auto-generated code below aims at helping you parse
@@ -86,16 +251,11 @@ int main()
         agent.setGateways(EI);
     }
 
-    // game loop
     while (1) {
         int SI; // The index of the node on which the Skynet agent is positioned this turn
         cin >> SI; cin.ignore();
-
-        // Write an action using cout. DON'T FORGET THE "<< endl"
-        // To debug: cerr << "Debug messages..." << endl;
-
-
-        // Example: 3 4 are the indices of the nodes you wish to sever the link between
-        cout << "3 4" << endl;
+        
+        agent.setSkyNetPosition(SI);
+        agent.checkLevelOne(SI);
     }
 }
